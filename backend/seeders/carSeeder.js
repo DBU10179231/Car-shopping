@@ -27,10 +27,10 @@ const seed = async () => {
         console.log('Connected to DB');
 
         // Create an admin user if not exists
-        let admin = await User.findOne({ email: 'admin@carshop.com' });
+        let admin = await User.findOne({ email: 'tebelmaryam437@gmail.com' });
         if (!admin) {
-            admin = await User.create({ name: 'Admin', email: 'admin@carshop.com', password: 'admin123', role: 'admin' });
-            console.log('Admin user created: admin@carshop.com / admin123');
+            admin = await User.create({ name: 'Admin', email: 'tebelmaryam437@gmail.com', password: 'admin123', role: 'admin' });
+            console.log('Admin user created: tebelmaryam437@gmail.com / admin123');
         }
 
         console.log(`Synchronizing ${seedCars.length} cars with stable IDs...`);
