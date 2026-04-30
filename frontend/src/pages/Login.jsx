@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { toast } from 'react-toastify';
-import { FiMail, FiLock, FiShoppingBag } from 'react-icons/fi';
+import { FiUser, FiLock, FiShoppingBag } from 'react-icons/fi';
 import './Auth.css';
 
 export default function Login() {
-    const [form, setForm] = useState({ email: '', password: '', rememberMe: false });
+    const [form, setForm] = useState({ username: '', password: '', rememberMe: false });
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -40,23 +40,44 @@ export default function Login() {
                 <p className="auth-sub">Sign in to your account to continue</p>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Email Address</label>
+                        <label>Username or Email</label>
                         <div className="input-icon">
-                            <FiMail />
-                            <input className="form-control" type="email" name="email" autoComplete="username" placeholder="you@example.com"
-                                value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
+                            <FiUser />
+                            <input 
+                                className="form-control" 
+                                type="text" 
+                                name="username" 
+                                autoComplete="username" 
+                                placeholder="Enter username or email"
+                                value={form.username} 
+                                onChange={e => setForm(f => ({ ...f, username: e.target.value }))} 
+                                required 
+                            />
                         </div>
                     </div>
                     <div className="form-group">
                         <label>Password</label>
                         <div style={{ position: 'relative' }}>
                             <FiLock className="input-icon" />
-                            <input required type="password" autoComplete="current-password" minLength={6} className="form-control" style={{ paddingLeft: 42 }} placeholder="••••••••"
-                                value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+                            <input 
+                                required 
+                                type="password" 
+                                autoComplete="current-password" 
+                                minLength={6} 
+                                className="form-control" 
+                                style={{ paddingLeft: 42 }} 
+                                placeholder="••••••••"
+                                value={form.password} 
+                                onChange={e => setForm(f => ({ ...f, password: e.target.value }))} 
+                            />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
                             <label style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                                <input type="checkbox" checked={form.rememberMe} onChange={e => setForm(f => ({ ...f, rememberMe: e.target.checked }))} />
+                                <input 
+                                    type="checkbox" 
+                                    checked={form.rememberMe} 
+                                    onChange={e => setForm(f => ({ ...f, rememberMe: e.target.checked }))} 
+                                />
                                 Remember Me
                             </label>
                             <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--primary)' }}>Forgot Password?</Link>

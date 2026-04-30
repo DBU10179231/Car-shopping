@@ -7,7 +7,7 @@ import { FiMail, FiLock, FiUser, FiShoppingBag } from 'react-icons/fi';
 import './Auth.css';
 
 export default function Register() {
-    const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user' });
+    const [form, setForm] = useState({ name: '', username: '', email: '', password: '', role: 'user' });
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -48,10 +48,18 @@ export default function Register() {
                         </div>
                     </div>
                     <div className="form-group">
+                        <label>Username</label>
+                        <div className="input-icon">
+                            <FiUser />
+                            <input className="form-control" type="text" name="username" placeholder="johndoe123"
+                                value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} required />
+                        </div>
+                    </div>
+                    <div className="form-group">
                         <label>Email Address</label>
                         <div className="input-icon">
                             <FiMail />
-                            <input className="form-control" type="email" name="email" autoComplete="username" placeholder="you@example.com"
+                            <input className="form-control" type="email" name="email" autoComplete="email" placeholder="you@example.com"
                                 value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
                         </div>
                     </div>
@@ -88,7 +96,7 @@ export default function Register() {
                             </button>
                         </div>
                     </div>
-                    <button className="btn btn-primary btn-block" type="submit" disabled={loading}>
+                    <button className="btn btn-primary btn-block" type="submit" disabled={loading} style={{ marginTop: '24px' }}>
                         {loading ? 'Creating Account...' : 'Create Account'}
                     </button>
                 </form>

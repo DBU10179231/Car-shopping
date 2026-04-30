@@ -34,10 +34,22 @@ const register = async (req, res) => {
 // @route   POST /api/auth/login
 const login = async (req, res) => {
     try {
-        const { email, password, rememberMe } = req.body;
-        const user = await User.findOne({ email });
+        const { email, username, password, rememberMe } = req.body;
+        const identifier = email || username;
+        
+        if (!identifier) {
+            return res.status(400).json({ message: 'Please provide email or username' });
+        }
+
+        const user = await User.findOne({
+            $or: [
+                { email: identifier.toLowerCase() },
+                { username: identifier }
+            ]
+        });
+
         if (!user || !(await user.matchPassword(password)))
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid credentials' });
 
         res.json({
             _id: user._id, name: user.name, email: user.email,
