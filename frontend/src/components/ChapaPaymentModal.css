@@ -20,6 +20,7 @@
     background: #0d1624;
     border-radius: 20px;
     display: flex;
+    flex-direction: row;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -34,7 +35,8 @@
 
 /* Sidebar */
 .chapa-sidebar {
-    width: 380px;
+    width: 350px;
+    flex: 0 0 350px;
     background: #142031;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
@@ -133,6 +135,7 @@
 /* Main Content */
 .chapa-main {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     padding: 40px;
