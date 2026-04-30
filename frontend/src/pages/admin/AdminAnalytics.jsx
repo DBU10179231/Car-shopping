@@ -331,7 +331,7 @@ export default function AdminAnalytics() {
                                 {chartData.length > 0 && (
                                     <div className="chart-card">
                                         <h3>{REPORT_TYPES.find(r => r.key === reportType)?.label} Trend</h3>
-                                        <ResponsiveContainer width="100%" height={300} minWidth={0}>
+                                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={0}>
                                             {reportType === 'financial' ? (
                                                 <AreaChart data={chartData}>
                                                     <defs>
@@ -363,7 +363,7 @@ export default function AdminAnalytics() {
                                 {pieData && pieData.length > 0 && (
                                     <div className="chart-card">
                                         <h3>Avg Price by Make</h3>
-                                        <ResponsiveContainer width="100%" height={300} minWidth={0}>
+                                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={0}>
                                             <PieChart>
                                                 <Pie data={pieData} innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value">
                                                     {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}

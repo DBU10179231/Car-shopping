@@ -169,7 +169,7 @@ export default function DashboardHome() {
                 <div className="chart-card">
                     <h3>User Registrations Over Time</h3>
                     <div style={{ width: '100%', height: 280 }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                        <ResponsiveContainer width="100%" height={280} minWidth={0} minHeight={0}>
                             <AreaChart data={charts?.registrations || []}>
                                 <defs>
                                     <linearGradient id="regGrad" x1="0" y1="0" x2="0" y2="1">
@@ -191,7 +191,7 @@ export default function DashboardHome() {
                 <div className="chart-card">
                     <h3>Listings by Category</h3>
                     <div style={{ width: '100%', height: 280 }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                        <ResponsiveContainer width="100%" height={280} minWidth={0} minHeight={0}>
                             <PieChart>
                                 <Pie data={charts?.categories || []} innerRadius={60} outerRadius={95} paddingAngle={5} dataKey="value">
                                     {(charts?.categories || []).map((entry, index) => (

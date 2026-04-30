@@ -183,7 +183,7 @@ export default function SellerHub() {
                         <Link to="/seller/dashboard" className="view-details">Full Analytics <FiChevronRight /></Link>
                     </div>
                     <div style={{ width: '100%', height: 250 }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={0}>
                             <AreaChart data={metrics?.monthlyTrend || []}>
                                 <defs>
                                     <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
