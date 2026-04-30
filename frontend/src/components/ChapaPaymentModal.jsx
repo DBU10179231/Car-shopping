@@ -153,7 +153,7 @@ export default function ChapaPaymentModal({
                                 disabled={phone.length < 10}
                                 onClick={handleNext}
                             >
-                                Pay using {currentMethod?.title || 'Selected Method'}
+                                Pay with {activeMethod === 'bank' ? 'Bank' : activeMethod === 'card' ? 'Card' : currentMethod?.title}
                             </button>
                         </>
                     ) : (
