@@ -117,6 +117,26 @@ const resetPassword = async (req, res) => {
     res.json({ token: generateToken(user._id, user.tokenVersion), message: 'Password reset successful' });
 };
 
+// @desc    Validate Reset Token
+// @route   GET /api/auth/validate-reset-token/:token
+const validateResetToken = async (req, res) => {
+    try {
+        const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+        const user = await User.findOne({
+            passwordResetToken: resetPasswordToken,
+            passwordResetExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ status: 'error', message: 'Invalid or expired token' });
+        }
+
+        res.json({ status: 'success', message: 'Token is valid' });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+};
+
 // @desc    Update Password
 // @route   PUT /api/auth/update-password
 const updatePassword = async (req, res) => {
@@ -211,7 +231,7 @@ const markNotificationAsRead = async (req, res) => {
 
 module.exports = {
     register, login, getProfile, toggleFavorite,
-    forgotPassword, resetPassword, updatePassword,
+    forgotPassword, resetPassword, validateResetToken, updatePassword,
     uploadPhoto, updateProfile, deleteAccount,
     getNotifications, markNotificationAsRead
 };

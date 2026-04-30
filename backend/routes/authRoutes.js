@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     register, login, getProfile, toggleFavorite,
-    forgotPassword, resetPassword, updatePassword,
+    forgotPassword, resetPassword, validateResetToken, updatePassword,
     uploadPhoto, updateProfile, deleteAccount,
     getNotifications, markNotificationAsRead
 } = require('../controllers/authController');
@@ -13,6 +13,7 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 router.put('/reset-password/:token', resetPassword);
+router.get('/validate-reset-token/:token', validateResetToken);
 
 router.get('/profile', protect, getProfile);
 router.put('/profile', protect, updateProfile);
