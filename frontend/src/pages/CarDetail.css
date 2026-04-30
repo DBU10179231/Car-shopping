@@ -1,0 +1,528 @@
+.detail-page {
+    padding: 30px 0 80px;
+    background: var(--bg-dark);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 60px;
+    margin-bottom: 60px;
+}
+
+/* Gallery - Enhanced */
+.gallery-main {
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    height: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-main:hover img {
+    transform: scale(1.05);
+}
+
+.fav-overlay {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.fav-overlay.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.gallery-thumbs {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.gallery-thumbs img {
+    width: 100px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 12px;
+    opacity: 0.6;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.gallery-thumbs img.active {
+    opacity: 1;
+    border-color: var(--primary);
+    transform: translateY(-4px);
+}
+
+/* Info Section */
+.detail-header {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.badge {
+    background: var(--primary-glow);
+    color: var(--primary);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--primary);
+}
+
+.detail-info h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.detail-year {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.detail-price {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    margin: 10px 0;
+    letter-spacing: -0.02em;
+}
+
+/* Command Center Stats Matrix */
+.command-center-specs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.command-spec {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.command-spec::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 10% 10%, var(--primary-glow), transparent 70%);
+    opacity: 0.1;
+}
+
+.command-spec:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.spec-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-dark);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 1rem;
+    border: 1px solid var(--border);
+}
+
+.spec-val label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.spec-val strong {
+    font-size: 0.85rem;
+    color: var(--text);
+}
+
+/* Feature tags */
+.detail-features h4 {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.features-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 32px;
+}
+
+.feature-tag {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    border: 1px solid var(--border);
+}
+
+.detail-desc {
+    color: var(--text-muted);
+    line-height: 1.5;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+/* Social & Rating Compaction */
+.social-share {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.social-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.social-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.detail-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+}
+
+/* Seller Card Compaction */
+.seller-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.seller-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.seller-details h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Vehicle Action Center */
+.vehicle-action-center {
+    margin: 30px 0 40px;
+}
+
+.action-desk-header {
+    margin-bottom: 30px;
+}
+
+.action-desk-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    color: var(--text);
+}
+
+.action-desk-header p {
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.glass-card {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.active-card {
+    border-color: #3b82f6;
+    background: #f0f6fc;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
+    color: #0f172a;
+}
+
+.card-header-premium h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: inherit;
+}
+
+.card-header-premium p {
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.form-toggle {
+    display: flex;
+    background: var(--bg-dark);
+    padding: 4px;
+    border-radius: 12px;
+    margin: 20px 0;
+    border: 1px solid var(--border);
+}
+
+.form-toggle button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.form-toggle button.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.command-input,
+.command-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.command-input:focus,
+.command-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+.command-input::placeholder,
+.command-textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.date-time-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 14px;
+    margin-top: auto;
+}
+
+/* Procurement card */
+.procure-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.price-intelligence {
+    margin-bottom: 30px;
+}
+
+.price-intelligence label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+}
+
+.price-intelligence .val {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin-top: 5px;
+}
+
+.secure-p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 20px;
+}
+
+.secure-p svg {
+    color: #10b981;
+}
+
+/* Reviews Panel */
+.reviews-section {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 30px;
+    border: 1px solid var(--border);
+}
+
+.review-card {
+    background: var(--bg-dark);
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+/* Phase 12: Sold Styles */
+.sold-badge-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.sold-badge-overlay span {
+    background: #ef4444;
+    color: #fff;
+    padding: 10px 40px;
+    font-size: 2rem;
+    font-weight: 900;
+    transform: rotate(-15deg);
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5);
+    border: 4px solid #fff;
+    letter-spacing: 0.1em;
+}
+
+.vehicle-sold-banner {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.sold-lock-btn {
+    width: 100%;
+    padding: 15px;
+    background: #334155;
+    color: #94a3b8;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 700;
+    cursor: not-allowed;
+    border: 1px solid #475569;
+}
+
+@media (max-width: 1200px) {
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,18 @@
+/* App-specific styles can go here. Layout is handled in index.css. */
+
+.admin-layout,
+.seller-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-main,
+.seller-main {
+  flex: 1;
+  background: #0d0d0f;
+}
+
+.admin-content,
+.seller-content {
+  padding: 32px;
+}

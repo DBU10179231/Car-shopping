@@ -1,0 +1,196 @@
+.car-card-premium {
+    display: block;
+    background: var(--bg-secondary, #1e1e2d);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.car-card-premium:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary, #4361ee);
+}
+
+.card-image-container {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+    background: #0f172a;
+    /* Fallback for slow loading images */
+}
+
+.main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.8s ease;
+    display: block;
+}
+
+.car-card-premium:hover .main-image {
+    transform: scale(1.1);
+}
+
+.card-badges {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.badge-glass {
+    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-sold {
+    padding: 4px 12px;
+    background: #ef233c;
+    color: white;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.favorite-action {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.favorite-action:hover {
+    background: rgba(230, 57, 70, 0.8);
+    transform: scale(1.1);
+}
+
+.favorite-action.active {
+    color: #ef233c;
+    background: white;
+}
+
+.card-content-premium {
+    padding: 20px;
+}
+
+.card-top-info h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text, #ffffff);
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted, #94a3b8);
+}
+
+.card-metrics {
+    display: flex;
+    justify-content: space-between;
+    margin: 18px 0;
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+}
+
+.metric svg {
+    font-size: 1rem;
+    color: var(--primary, #4361ee);
+}
+
+.metric span {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.card-footer-premium {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-label {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.currency {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.amount {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.view-more-hint {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary);
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+.car-card-premium:hover .view-more-hint {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.no-image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #264653 0%, #2a9d8f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+}
