@@ -101,12 +101,15 @@ const checkout = async (req, res) => {
             try {
                 const existingLogistics = await Logistics.findOne({ order: order._id });
                 if (!existingLogistics) {
-                    const sellerId = carDoc?.seller?._id || carDoc?.seller || null;
-                    await Logistics.create({
-                        order: order._id,
-                        car: carDoc._id,
-                        buyer: user._id,
-                        seller: sellerId,
+                    const sellerId = carDoc?.seller?._id || carDoc?.seller;
+                    if (!sellerId) {
+                        console.warn('⚠️ Skipping logistics creation: No seller ID found on car.');
+                    } else {
+                        await Logistics.create({
+                            order: order._id,
+                            car: carDoc._id,
+                            buyer: user._id,
+                            seller: sellerId,
                         trackingNumber: `TRK-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                         pickupDetails: logisticsData.pickupDetails,
                         deliveryDetails: logisticsData.deliveryDetails,
@@ -134,10 +137,13 @@ const checkout = async (req, res) => {
 
 
         // Initialize External Payment
+        // Ensure email is valid for Chapa (they are strict)
+        const safeEmail = user.email && user.email.includes('@') ? user.email : 'customer@automarket.com';
+
         const paymentResponse = await initializePayment({
             amount: finalAmount,
             currency: 'ETB',
-            email: user.email,
+            email: safeEmail,
             first_name,
             last_name,
             tx_ref: order.tx_ref,
@@ -159,7 +165,10 @@ const checkout = async (req, res) => {
             amount: finalAmount
         });
     } catch (err) {
-        console.error('Checkout error:', err);
+        console.error('❌ Checkout Error:', err.message);
+        if (err.response?.data) {
+            console.error('Chapa Response Error:', err.response.data);
+        }
         res.status(500).json({ message: err.message || 'An unexpected error occurred during checkout.' });
     }
 };
@@ -181,6 +190,10 @@ const handleSuccessfulPayment = async (order, transactionId = null) => {
         if (transactionId) {
             console.log(`💾 Saving transactionId: ${transactionId} for Order: ${order.tx_ref}`);
             order.transactionId = transactionId;
+        } else if (!order.transactionId || order.transactionId.startsWith('tx-')) {
+            // Generate a mock Chapa-like ID if missing (starts with AP-MOCK)
+            order.transactionId = `AP-MOCK-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+            console.log(`🛡️ Generated Mock Chapa ID: ${order.transactionId}`);
         }
     }
 
@@ -322,14 +335,19 @@ const verifyPayment = async (req, res) => {
 const simulateMobileConfirm = async (req, res) => {
     try {
         const { tx_ref, pin } = req.body;
-        if (!tx_ref) return res.status(400).json({ message: 'tx_ref is required' });
+        console.log('Mobile Confirm Body:', req.body);
+        if (!tx_ref) {
+            console.log('Error: tx_ref is required');
+            return res.status(400).json({ message: 'tx_ref is required' });
+        }
 
         // Accept any 4-digit PIN for true realism (Point 1)
-        if (!/^\d{4}$/.test(pin)) {
+        if (!/^\d{4}$/.test(String(pin))) {
+            console.log('Error: Invalid PIN format', pin);
             return res.status(400).json({ message: 'Invalid PIN format. Must be 4 digits.' });
         }
 
-        if (pin === '0000') {
+        if (String(pin) === '0000') {
             return res.status(400).json({ message: 'Insufficient funds. Transaction declined.' });
         }
 

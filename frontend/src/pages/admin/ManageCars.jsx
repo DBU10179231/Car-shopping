@@ -164,14 +164,15 @@ export default function ManageCars() {
                             <th>Price</th>
                             <th>Seller</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th>Date Logged</th>
+                            <th>Intervention</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: 40 }}><div className="spinner"></div></td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center', padding: 40 }}><div className="spinner"></div></td></tr>
                         ) : filteredCars.length === 0 ? (
-                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: 40 }}>No cars found</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center', padding: 40 }}>No cars found</td></tr>
                         ) : (
                             filteredCars.map(c => (
                                 <tr key={c._id}>
@@ -199,21 +200,20 @@ export default function ManageCars() {
                                         </span>
                                     </td>
                                     <td>
+                                        <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                            {new Date(c.createdAt).toLocaleDateString()}
+                                        </div>
+                                    </td>
+                                    <td>
                                         <div style={{ display: 'flex', gap: 8 }}>
-                                            {/* All admins can Approve pending listings */}
-                                            {c.status !== 'active' && (
+                                            {c.status === 'pending' && (
                                                 <button className="icon-btn" style={{ color: '#2a9d8f' }} title="Approve" onClick={() => updateStatus(c._id, 'active')}><FiCheckCircle /></button>
                                             )}
-                                            {/* All admins can Reject non-rejected listings */}
                                             {c.status !== 'rejected' && (
-                                                <button className="icon-btn" style={{ color: '#e63946' }} title="Reject Listing" onClick={() => updateStatus(c._id, 'rejected')}><FiXCircle /></button>
+                                                <button className="icon-btn" style={{ color: '#e63946' }} title="Reject" onClick={() => updateStatus(c._id, 'rejected')}><FiXCircle /></button>
                                             )}
-                                            {/* All admins can Edit or Delete now based on user request */}
-                                            <button className="icon-btn" style={{ color: '#4a90e2' }} title="Upload" onClick={() => handleOpenModal(c)}><FiUpload /></button>
-                                            <button className="icon-btn" style={{ color: '#2ecc71' }} title="Add" onClick={() => handleOpenModal()}><FiPlus /></button>
                                             <button className="icon-btn edit" title="Edit" onClick={() => handleOpenModal(c)}><FiEdit2 /></button>
                                             <button className="icon-btn delete" title="Delete" onClick={() => deleteCar(c._id)}><FiTrash2 /></button>
-                                            <button className="icon-btn" style={{ color: '#f39c12' }} title="Update" onClick={() => handleOpenModal(c)}><FiRefreshCw /></button>
                                         </div>
                                     </td>
                                 </tr>

@@ -12,7 +12,6 @@ export const sanitizeImageUrl = (url, type = 'car') => {
         return type === 'avatar' ? DEFAULT_AVATAR : DEFAULT_CAR;
     }
 
-    // Block known broken placeholder domains
     const brokenDomains = [
         'via.placeholder.com',
         'placeholder.com',
@@ -28,7 +27,7 @@ export const sanitizeImageUrl = (url, type = 'car') => {
 
     // Handle relative paths for uploaded images
     if (url.startsWith('/uploads/')) {
-        const backendUrl = `http://127.0.0.1:5008`;
+        const backendUrl = `http://localhost:5008`;
         return `${backendUrl}${url}`;
     }
 

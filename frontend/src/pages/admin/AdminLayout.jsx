@@ -1,64 +1,94 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import {
     FiGrid, FiUsers, FiBox, FiShoppingBag, FiSettings, FiChevronLeft, FiChevronRight,
     FiBarChart2, FiFileText, FiHelpCircle, FiActivity, FiSun, FiMoon,
-    FiShield, FiTruck, FiSearch, FiLogOut, FiBell, FiPlus, FiStar, FiPackage, FiCreditCard
+    FiShield, FiTruck, FiSearch, FiLogOut, FiBell, FiPlus, FiStar, FiPackage, FiCreditCard,
+    FiCheckCircle
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import api from '../../api/axios';
 import './AdminLayout.css';
 
-const navSections = [
-    {
-        label: 'Intelligence',
-        items: [
-            { to: '/admin', end: true, icon: <FiGrid />, label: 'Mission Control' },
-            { to: '/admin/analytics', icon: <FiBarChart2 />, label: 'Intelligence Reports', permission: 'view_analytics' },
-        ]
-    },
-    {
-        label: 'Core Entities',
-        items: [
-            { to: '/admin/users', icon: <FiUsers />, label: 'User Central', permission: 'edit_users' },
-            { to: '/admin/sellers', icon: <FiUsers />, label: 'Dealer Registry', permission: 'edit_users' },
-            { to: '/admin/cars', icon: <FiBox />, label: 'Inventory Control', permission: 'manage_listings' },
-            { to: '/admin/categories', icon: <FiGrid />, label: 'Catalog Architect', permission: 'manage_catalog' },
-        ]
-    },
-    {
-        label: 'Commerce',
-        items: [
-            { to: '/admin/orders', icon: <FiShoppingBag />, label: 'Transaction Matrix', permission: 'manage_orders' },
-            { to: '/admin/payments', icon: <FiCreditCard />, label: 'Finance Vault', permission: 'manage_finance' },
-        ]
-    },
-    {
-        label: 'Moderation',
-        items: [
-            { to: '/admin/reviews', icon: <FiStar />, label: 'Moderation Suite', permission: 'manage_reviews' },
-            { to: '/admin/support', icon: <FiHelpCircle />, label: 'Customer Support' },
-        ]
-    },
-    {
-        label: 'System',
-        items: [
-            { to: '/admin/settings', icon: <FiSettings />, label: 'System Operations' },
-            { to: '/admin/audit-logs', icon: <FiFileText />, label: 'Security Desk', permission: 'view_audit_logs' },
-            { to: '/admin/system', icon: <FiActivity />, label: 'Health Status', permission: 'manage_roles' },
-            { to: '/admin/profile', icon: <FiShield />, label: 'My Identity' },
-        ]
-    }
-];
 
 export default function AdminLayout() {
     const [collapsed, setCollapsed] = useState(false);
     const [search, setSearch] = useState('');
+    const [counts, setCounts] = useState({ unreadSupport: 0, pendingListings: 0 });
     const { user, logout, viewMode, switchViewMode } = useAuth();
     const { dark, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const fetchCounts = async () => {
+            try {
+                const res = await api.get('/admin/metrics');
+                setCounts({
+                    unreadSupport: res.data.unreadSupport || 0,
+                    pendingListings: res.data.pendingListings || 0
+                });
+            } catch (err) {
+                console.error('Failed to sync notification counts', err);
+            }
+        };
+        fetchCounts();
+        const interval = setInterval(fetchCounts, 30000); // Poll every 30s
+        return () => clearInterval(interval);
+    }, []);
+
     const handleLogout = () => { logout(); navigate('/'); };
+
+    const sections = [
+        {
+            label: 'MAIN',
+            items: [
+                { to: '/admin', end: true, label: 'Dashboard' },
+            ]
+        },
+        {
+            label: 'OPERATIONS',
+            items: [
+                { to: '/admin/cars', label: 'Listings', permission: 'manage_listings' },
+                { to: '/admin/orders', label: 'Orders', permission: 'manage_orders' },
+            ]
+        },
+        {
+            label: 'USERS',
+            items: [
+                { to: '/admin/users', label: 'Manage Users', permission: 'edit_users' },
+                { to: '/admin/sellers', label: 'Sellers', permission: 'edit_users' },
+            ]
+        },
+        {
+            label: 'MODERATION',
+            items: [
+                { 
+                    to: '/admin/approvals', 
+                    label: 'Approvals', 
+                    permission: 'manage_listings',
+                    badge: counts.pendingListings
+                },
+                {
+                    to: '/admin/support',
+                    label: 'Customer Support',
+                    badge: counts.unreadSupport
+                },
+            ]
+        },
+        {
+            label: 'SYSTEM',
+            items: [
+                { to: '/admin/settings', label: 'Settings / System Ops' },
+            ]
+        },
+        {
+            label: 'ACCOUNT',
+            items: [
+                { to: '/admin/profile', label: 'My Identity' },
+            ]
+        }
+    ];
 
     return (
         <div className={`admin-layout ${collapsed ? 'sidebar-collapsed' : ''}`}>
@@ -72,11 +102,10 @@ export default function AdminLayout() {
                 </div>
 
                 <nav className="admin-nav">
-                    {navSections.map(section => {
+                    {sections.map(section => {
                         const filteredItems = section.items.filter(item => {
                             if (!item.permission) return true;
-                            // Super admin has all
-                            if (user?.role === 'admin') return true;
+                            if (user?.role === 'admin' || user?.role === 'super_admin') return true;
                             return user?.permissions?.includes(item.permission);
                         });
 
@@ -87,8 +116,13 @@ export default function AdminLayout() {
                                 {!collapsed && <span className="nav-section-label">{section.label}</span>}
                                 {filteredItems.map(item => (
                                     <NavLink key={item.to} to={item.to} end={item.end} title={collapsed ? item.label : ''}>
-                                        <span className="nav-icon">{item.icon}</span>
-                                        {!collapsed && <span className="nav-label">{item.label}</span>}
+                                        <span className="nav-label">{item.label}</span>
+                                        {item.badge > 0 && !collapsed && (
+                                            <span className="nav-badge-minimal">{item.badge}</span>
+                                        )}
+                                        {item.badge > 0 && collapsed && (
+                                            <span className="nav-badge-dot"></span>
+                                        )}
                                     </NavLink>
                                 ))}
                             </div>
@@ -142,32 +176,6 @@ export default function AdminLayout() {
 
             {/* Main */}
             <div className="admin-main-wrapper">
-                {/* Top Header */}
-                <header className="admin-topbar">
-                    <div className="topbar-search">
-                        <FiSearch />
-                        <input
-                            type="text"
-                            placeholder="Search users, listings, orders..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                        />
-                    </div>
-                    <div className="topbar-actions">
-                        {/* Quick Actions */}
-                        <Link to="/admin/cars" className="topbar-quick-btn" title="Add New Car Listing">
-                            <FiPlus /> <span>Add Listing</span>
-                        </Link>
-                        <button className="topbar-icon-btn" title="Notifications"><FiBell /></button>
-                        <button className="topbar-icon-btn" onClick={toggleTheme} title="Toggle Theme">
-                            {dark ? <FiSun /> : <FiMoon />}
-                        </button>
-                        <button className="topbar-icon-btn danger" onClick={handleLogout} title="Logout">
-                            <FiLogOut />
-                        </button>
-                    </div>
-                </header>
-
                 <main className="admin-main">
                     <div className="admin-content">
                         <Outlet />

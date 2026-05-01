@@ -97,7 +97,8 @@ const getCarById = async (req, res) => {
         }
         
         // Basic ID validation to prevent CastError 500s
-        if (!id || id.length !== 24) {
+        const isValidId = id && /^[0-9a-fA-F]{24}$/.test(id);
+        if (!isValidId) {
             return res.status(400).json({ message: 'Invalid Car ID format' });
         }
 

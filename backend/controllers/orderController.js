@@ -157,9 +157,11 @@ const getOrderById = async (req, res) => {
         if (!order) return res.status(404).json({ message: 'Order not found' });
 
         // Auth check
-        if (req.user.role !== 'admin' && req.user.role !== 'super_admin' &&
-            order.user._id.toString() !== req.user._id.toString() &&
-            order.car.seller._id.toString() !== req.user._id.toString()) {
+        const isOwner = order.user && order.user._id.toString() === req.user._id.toString();
+        const isSeller = order.car && order.car.seller && order.car.seller._id.toString() === req.user._id.toString();
+        const isAdmin = ['admin', 'super_admin'].includes(req.user.role);
+
+        if (!isAdmin && !isOwner && !isSeller) {
             return res.status(401).json({ message: 'Not authorized' });
         }
 
@@ -224,7 +226,9 @@ const acceptPrice = async (req, res) => {
         await order.save();
 
         // Create confirmation message
-        const sellerId = order.car.seller?._id || order.car.seller;
+        const sellerId = order.car?.seller?._id || order.car?.seller;
+        if (!sellerId) return res.status(400).json({ message: 'Seller information missing' });
+        
         const recipient = req.user._id.toString() === order.user.toString() ? sellerId : order.user;
         
         const displayPrice = (order.totalPrice || 0).toLocaleString();
@@ -233,7 +237,7 @@ const acceptPrice = async (req, res) => {
             sender: req.user._id,
             recipient,
             order: order._id,
-            car: order.car._id,
+            car: order.car?._id,
             content: `Price of $${displayPrice} accepted. Proceeding to payment.`
         });
 
@@ -381,23 +385,29 @@ const getAllOrders = async (req, res) => {
             .populate('car', 'make model year price images')
             .sort({ createdAt: -1 });
 
+        // Find all admins once to exclude their messages from the "unread for support" count
+        const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id');
+        const adminIds = admins.map(a => a._id.toString());
+
         // For admins, show total unread messages in the order that are NOT from admins
         const ordersWithUnread = await Promise.all(orders.map(async (order) => {
-            // Find all admins to exclude their messages from the "unread for support" count
-            const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id');
-            const adminIds = admins.map(a => a._id.toString());
-
-            const unreadCount = await Message.countDocuments({
-                order: order._id,
-                sender: { $nin: adminIds },
-                isRead: false
-            });
-            return { ...order._doc, unreadMessages: unreadCount };
+            try {
+                const unreadCount = await Message.countDocuments({
+                    order: order._id,
+                    sender: { $nin: adminIds },
+                    isRead: false
+                });
+                return { ...order._doc, unreadMessages: unreadCount };
+            } catch (err) {
+                console.error(`Error processing order ${order._id} messages:`, err.message);
+                return { ...order._doc, unreadMessages: 0 }; // Fallback
+            }
         }));
 
         res.json(ordersWithUnread);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error('GetAllOrders Error:', err);
+        res.status(500).json({ message: err.message || 'Internal server error' });
     }
 };
 

@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { FiCreditCard, FiZap, FiTruck, FiSmartphone, FiRepeat } from 'react-icons/fi';
+import { 
+    FiCreditCard, FiZap, FiTruck, FiSmartphone, FiRepeat, FiGlobe, 
+    FiArrowRight, FiCheckCircle, FiXCircle, FiLock, FiX, FiCheck, FiArrowLeft, FiShield
+} from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +30,12 @@ export default function CheckoutButton({ car, onPaymentSuccess, orderId, totalPr
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalData, setModalData] = useState(null);
+    
+    // Advanced Flow State
+    const [checkoutStep, setCheckoutStep] = useState('summary'); // summary, payment, confirm, success
+    const [paymentMethod, setPaymentMethod] = useState('card');
+    const [phone, setPhone] = useState('');
+    const [orderRef, setOrderRef] = useState(null);
 
     // Fetch shipping quote when delivery is toggled and city is entered
     useEffect(() => {
@@ -52,67 +61,69 @@ export default function CheckoutButton({ car, onPaymentSuccess, orderId, totalPr
         }
     };
 
-    const handleCheckout = async () => {
-        if (showLogistics && (!logistics.address || !logistics.city || !logistics.scheduledDate)) {
-            toast.error('Please fill in all delivery details');
-            return;
-        }
-        if (!user || !user.token) {
-            toast.warning('Session expired. Please login to continue.');
-            navigate('/login', { state: { from: window.location.pathname } });
-            return;
-        }
-
+    const handleInitPayment = async () => {
         setLoading(true);
-        toast.info('Initializing secure checkout...');
-
         try {
             const payload = {
                 carId: car._id,
                 orderId: orderId || null,
                 amount: BOOKING_FEE,
-                paymentMethod: 'chapa',
-                isBookingFee: true // Flag for backend
+                paymentMethod: paymentMethod, // chapa, telebirr, etc.
+                isBookingFee: true
             };
-
             if (showLogistics) {
                 payload.logisticsData = {
                     quote: logistics.quote,
-                    pickupDetails: {
-                        address: 'Seller Showroom',
-                        scheduledDate: logistics.scheduledDate,
-                        scheduledTime: logistics.scheduledTime
-                    },
-                    deliveryDetails: {
-                        address: `${logistics.address}, ${logistics.city}`
-                    }
+                    pickupDetails: { address: 'Seller Showroom', scheduledDate: logistics.scheduledDate, scheduledTime: logistics.scheduledTime },
+                    deliveryDetails: { address: `${logistics.address}, ${logistics.city}` }
                 };
             }
-
             const { data } = await api.post('/payments/checkout', payload);
-            
-            // Instead of immediate redirect, open our advanced modal
             setModalData(data);
-            setIsModalOpen(true);
-            
-            toast.success('Secure Payment Gateway Ready');
+            setCheckoutStep('confirm');
         } catch (err) {
-            console.error('Checkout Error:', err);
-            const msg = err.response?.data?.message || err.message || 'Payment initialization failed';
-            toast.error(msg);
+            toast.error(err.response?.data?.message || 'Initialization failed');
         } finally {
             setLoading(false);
         }
     };
 
-    const handlePaymentSuccess = (order) => {
-        setIsModalOpen(false);
-        if (onPaymentSuccess) {
-            onPaymentSuccess(order);
-        } else {
-            navigate('/payment/verify?tx_ref=' + order.tx_ref);
-        }
+    const handleConfirmAndPay = () => {
+        setIsModalOpen(true);
     };
+
+    const handleFinalSuccess = (order) => {
+        setOrderRef(order);
+        setCheckoutStep('success');
+    };
+
+    if (checkoutStep === 'success') {
+        return (
+            <div className="checkout-success-view glass-card" style={{ padding: 40, textAlign: 'center', background: '#fff' }}>
+                <div style={{ width: 80, height: 80, background: '#10b981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: '#fff', fontSize: '2.5rem' }}>
+                    <FiCheckCircle />
+                </div>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: 12 }}>Reservation Confirmed!</h2>
+                <p style={{ color: '#64748b', fontSize: '1.1rem', marginBottom: 30 }}>The vehicle has been locked for you. Our inspection team will contact you within 24 hours.</p>
+                
+                <div style={{ background: '#f8fafc', padding: 20, borderRadius: 12, textAlign: 'left', marginBottom: 30 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <span style={{ fontWeight: 600 }}>Order ID</span>
+                        <span style={{ color: 'var(--primary)', fontWeight: 700 }}>#{orderRef?.tx_ref?.slice(-6).toUpperCase()}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontWeight: 600 }}>Next Step</span>
+                        <span style={{ color: '#10b981', fontWeight: 700 }}>Physical Inspection</span>
+                    </div>
+                </div>
+
+                <div style={{ display: 'grid', gap: 12 }}>
+                    <button className="btn btn-primary btn-block" onClick={() => navigate('/buyer/dashboard')}>View My Order</button>
+                    <button className="btn btn-secondary btn-block" onClick={() => navigate('/support')}>Contact Support</button>
+                </div>
+            </div>
+        );
+    }
 
     const baseAmount = BOOKING_FEE;
     const taxAmount = Math.round(baseAmount * TAX_RATE);
@@ -121,155 +132,162 @@ export default function CheckoutButton({ car, onPaymentSuccess, orderId, totalPr
 
     return (
         <div style={{
-            padding: 24,
+            padding: 30,
             background: '#ffffff',
-            borderRadius: 16,
+            borderRadius: 20,
             border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.02)',
-            margin: '0',
-            fontFamily: 'inherit',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
             color: '#0f172a'
         }}>
-            {/* Doorstep Delivery Toggle */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, padding: '16px', background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <FiTruck size={22} color="#10b981" />
-                    <div>
-                        <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '1rem' }}>Doorstep Delivery</span>
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Add shipping to your order</p>
-                    </div>
-                </div>
-                <label style={{ position: 'relative', display: 'inline-block', width: 44, height: 24, cursor: 'pointer' }}>
-                    <input
-                        type="checkbox"
-                        checked={showLogistics}
-                        onChange={e => setShowLogistics(e.target.checked)}
-                        style={{ opacity: 0, width: 0, height: 0 }}
-                    />
-                    <span style={{
-                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: showLogistics ? '#2a9d8f' : '#cbd5e1',
-                        borderRadius: 34, transition: '.3s'
-                    }}>
-                        <span style={{
-                            position: 'absolute', height: 18, width: 18,
-                            left: showLogistics ? 22 : 4, bottom: 3,
-                            backgroundColor: 'white', transition: '.3s', borderRadius: '50%'
-                        }} />
-                    </span>
-                </label>
+            {/* Step Indicator */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 30 }}>
+                {['summary', 'payment', 'confirm'].map((s, i) => (
+                    <div key={s} style={{ 
+                        height: 4, flex: 1, 
+                        background: (['summary', 'payment', 'confirm'].indexOf(checkoutStep) >= i) ? '#2a9d8f' : '#e2e8f0',
+                        borderRadius: 2
+                    }} />
+                ))}
             </div>
 
-            {/* Logistics Fields */}
-            {showLogistics && (
-                <div style={{ display: 'grid', gap: 10, marginBottom: 16 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                        <input
-                            className="form-control"
-                            placeholder="Delivery City"
-                            value={logistics.city}
-                            onChange={e => setLogistics({ ...logistics, city: e.target.value })}
-                        />
-                        <input
-                            className="form-control"
-                            type="date"
-                            min={new Date().toISOString().split('T')[0]}
-                            value={logistics.scheduledDate}
-                            onChange={e => setLogistics({ ...logistics, scheduledDate: e.target.value })}
-                        />
+            {checkoutStep === 'summary' && (
+                <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                        <FiTruck size={24} color="#2a9d8f" />
+                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>Delivery Preference</h3>
                     </div>
-                    <input
-                        className="form-control"
-                        placeholder="Street Address"
-                        value={logistics.address}
-                        onChange={e => setLogistics({ ...logistics, address: e.target.value })}
-                    />
-                    <div style={{ background: 'var(--bg-card)', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <FiTruck size={16} color="#2a9d8f" /> Shipping Quote:
-                        </span>
-                        <strong style={{ color: '#2a9d8f', fontSize: '1rem' }}>
-                            {quoteLoading ? 'Calculating...' : `${(logistics.quote || 0).toLocaleString()} ETB`}
-                        </strong>
+
+                    {/* Logistics Toggle & Fields */}
+                    <div style={{ marginBottom: 30 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16, background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0', cursor: 'pointer' }} onClick={() => setShowLogistics(!showLogistics)}>
+                            <span style={{ fontWeight: 700 }}>Enable Doorstep Delivery</span>
+                            <div style={{ width: 44, height: 24, background: showLogistics ? '#2a9d8f' : '#cbd5e1', borderRadius: 34, position: 'relative', transition: '.3s' }}>
+                                <div style={{ position: 'absolute', height: 18, width: 18, left: showLogistics ? 22 : 4, top: 3, background: '#fff', borderRadius: '50%', transition: '.3s' }} />
+                            </div>
+                        </div>
+
+                        {showLogistics && (
+                            <div style={{ marginTop: 20, display: 'grid', gap: 12 }}>
+                                <input className="form-control" placeholder="City" value={logistics.city} onChange={e => setLogistics({...logistics, city: e.target.value})} />
+                                <input className="form-control" placeholder="Address" value={logistics.address} onChange={e => setLogistics({...logistics, address: e.target.value})} />
+                                <input className="form-control" type="date" value={logistics.scheduledDate} onChange={e => setLogistics({...logistics, scheduledDate: e.target.value})} />
+                                {logistics.quote > 0 && (
+                                    <div style={{ padding: 12, background: 'rgba(42, 157, 143, 0.1)', color: '#2a9d8f', borderRadius: 8, fontWeight: 700, fontSize: '0.9rem' }}>
+                                        Estimated Shipping: {logistics.quote.toLocaleString()} ETB
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <button className="btn btn-primary btn-block" style={{ padding: 16, fontSize: '1rem' }} onClick={() => setCheckoutStep('payment')}>
+                        Proceed to Payment Method <FiArrowRight />
+                    </button>
+                </>
+            )}
+
+            {checkoutStep === 'payment' && (
+                <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                        <FiCreditCard size={24} color="#2a9d8f" />
+                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>Payment Method</h3>
+                    </div>
+
+                    <div style={{ display: 'grid', gap: 12, marginBottom: 30 }}>
+                        {[
+                            { id: 'card', name: 'Credit / Debit Card', icon: <FiCreditCard />, sub: 'Visa, Mastercard' },
+                            { id: 'telebirr', name: 'Telebirr', icon: <FiSmartphone />, sub: 'Instant mobile payment' },
+                            { id: 'bank', name: 'Bank Transfer / CBE', icon: <FiRepeat />, sub: 'Offline bank transfer' }
+                        ].map(m => (
+                            <div key={m.id} 
+                                onClick={() => setPaymentMethod(m.id)}
+                                style={{ 
+                                    padding: 20, borderRadius: 12, border: '2px solid', 
+                                    borderColor: paymentMethod === m.id ? '#2a9d8f' : '#e2e8f0',
+                                    background: paymentMethod === m.id ? 'rgba(42,157,143,0.05)' : '#fff',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16, transition: '.2s'
+                                }}
+                            >
+                                <div style={{ fontSize: '1.5rem', color: paymentMethod === m.id ? '#2a9d8f' : '#64748b' }}>{m.icon}</div>
+                                <div>
+                                    <div style={{ fontWeight: 700, fontSize: '1rem' }}>{m.name}</div>
+                                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{m.sub}</div>
+                                </div>
+                                {paymentMethod === m.id && <FiCheckCircle style={{ marginLeft: 'auto', color: '#2a9d8f' }} />}
+                            </div>
+                        ))}
+                    </div>
+
+                    {paymentMethod === 'telebirr' && (
+                        <div style={{ marginBottom: 30 }}>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 8, display: 'block' }}>Telebirr Phone Number</label>
+                            <input 
+                                className="form-control" 
+                                placeholder="09XXXXXXXX" 
+                                value={phone} 
+                                onChange={e => setPhone(e.target.value)}
+                                style={{ fontSize: '1.1rem', padding: 14 }}
+                            />
+                        </div>
+                    )}
+
+                    <div style={{ marginBottom: 30, padding: 16, background: '#f8fafc', borderRadius: 12, border: '1px dotted #cbd5e1', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#64748b', fontSize: '0.85rem' }}>
+                            <FiShield /> Secured by Chapa Gateway
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 12 }}>
+                        <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setCheckoutStep('summary')}>Back</button>
+                        <button className="btn btn-primary" style={{ flex: 2, padding: 16 }} onClick={handleInitPayment} disabled={loading}>
+                            {loading ? 'Initializing...' : `Pay ${grandTotal.toLocaleString()} ETB`}
+                        </button>
+                    </div>
+                </>
+            )}
+
+            {checkoutStep === 'confirm' && (
+                <div className="confirmation-modal-lite">
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: 8 }}>Confirm Payment</h3>
+                    <p style={{ color: '#64748b', marginBottom: 24 }}>Please review your reservation details.</p>
+                    
+                    <div style={{ background: '#f1f5f9', padding: 20, borderRadius: 16, marginBottom: 30 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                            <span style={{ color: '#64748b' }}>For Vehicle</span>
+                            <div style={{ textAlign: 'right' }}>
+                                <strong style={{ color: '#0f172a', display: 'block' }}>{car.make} {car.model}</strong>
+                                {car.seller?.isVerifiedSeller && (
+                                    <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+                                        <FiCheckCircle size={10} /> Verified Seller
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                            <span style={{ color: '#64748b' }}>Payment Now</span>
+                            <strong style={{ color: '#2a9d8f', fontSize: '1.2rem' }}>{grandTotal.toLocaleString()} ETB</strong>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid #cbd5e1' }}>
+                            <span style={{ color: '#64748b' }}>Remaining Balance</span>
+                            <strong style={{ color: '#0f172a' }}>{(car.price - BOOKING_FEE).toLocaleString()} ETB</strong>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 12 }}>
+                        <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setCheckoutStep('payment')}>Edit</button>
+                        <button className="btn btn-primary" style={{ flex: 2, padding: 16, fontSize: '1.1rem' }} onClick={handleConfirmAndPay}>
+                            Confirm &amp; Pay <FiArrowRight />
+                        </button>
                     </div>
                 </div>
             )}
-
-            {/* Price Breakdown */}
-            <div style={{ marginBottom: 20, padding: '16px', background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0', display: 'grid', gap: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#64748b' }}>
-                    <span style={{ fontWeight: 600 }}>Reservation Deposit</span>
-                    <span style={{ fontWeight: 600 }}>{baseAmount.toLocaleString()} ETB</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#64748b' }}>
-                    <span>Sales Tax (15%)</span>
-                    <span>{taxAmount.toLocaleString()} ETB</span>
-                </div>
-                {showLogistics && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: '#64748b' }}>
-                        <span>Shipping & Logistics</span>
-                        <span>{logistics.quote.toLocaleString()} ETB</span>
-                    </div>
-                )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, paddingTop: 12, borderTop: '1px solid #e2e8f0' }}>
-                    <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1.1rem' }}>Total to Pay Now</span>
-                    <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a' }}>
-                        {grandTotal.toLocaleString()} ETB
-                    </span>
-                </div>
-                <p style={{ margin: '12px 0 0', fontSize: '0.75rem', color: '#64748b', fontStyle: 'italic', textAlign: 'center' }}>
-                    The remaining balance will be settled directly with the seller upon vehicle inspection and transfer.
-                </p>
-            </div>
-
-
-            {/* Checkout Button */}
-            <button
-                style={{
-                    width: '100%',
-                    padding: '15px 20px',
-                    fontSize: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 10,
-                    background: 'linear-gradient(135deg, #2a9d8f 0%, #264653 100%)',
-                    color: '#fff',
-                    border: 'none',
-                    boxShadow: `0 8px 20px rgba(42, 157, 143, 0.3)`,
-                    fontWeight: 700,
-                    borderRadius: 12,
-                    cursor: loading || (showLogistics && quoteLoading) ? 'not-allowed' : 'pointer',
-                    opacity: loading || (showLogistics && quoteLoading) ? 0.7 : 1,
-                    transition: 'all 0.3s ease'
-                }}
-                onClick={handleCheckout}
-                disabled={loading || (showLogistics && quoteLoading)}
-            >
-                {loading ? (
-                    <span style={{ width: 20, height: 20, border: '3px solid rgba(255,255,255,0.4)', borderTop: '3px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} />
-                ) : (
-                    <>
-                        <FiZap size={18} />
-                        Pay Securely with Chapa
-                    </>
-                )}
-
-            </button>
-
-            <style>{`
-                @keyframes spin { 
-                    from { transform: rotate(0deg); } 
-                    to { transform: rotate(360deg); } 
-                }
-            `}</style>
 
             {isModalOpen && modalData && (
                 <ChapaPaymentModal 
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    paymentData={modalData}
-                    onSuccess={handlePaymentSuccess}
+                    paymentData={{ ...modalData, preferredMethod: paymentMethod, phone }}
+                    onSuccess={handleFinalSuccess}
                 />
             )}
         </div>

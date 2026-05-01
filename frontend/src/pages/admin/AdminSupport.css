@@ -1,0 +1,147 @@
+.admin-support-suite {
+    padding-bottom: 60px;
+}
+
+.ticket-list-panel {
+    border-radius: 20px;
+}
+
+.form-control-minimal {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 10px 15px;
+    color: white;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+
+.form-control-minimal:focus {
+    border-color: var(--primary);
+}
+
+.admin-table-minimal table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table-minimal th {
+    text-align: left;
+    padding: 15px 25px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.ticket-row {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ticket-row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.ticket-row.active {
+    background: rgba(230, 57, 70, 0.05);
+}
+
+.ticket-row td {
+    padding: 15px 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.badge-minimal {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.badge-minimal.resolved { background: rgba(42, 157, 143, 0.15); color: #2a9d8f; }
+.badge-minimal.closed { background: rgba(230, 57, 70, 0.15); color: #e63946; }
+
+.chat-msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+}
+
+.chat-msg.admin { align-self: flex-end; }
+.chat-msg.user { align-self: flex-start; }
+
+.msg-bubble-minimal {
+    padding: 12px 18px;
+    border-radius: 15px;
+}
+
+.admin .msg-bubble-minimal {
+    background: var(--primary);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.user .msg-bubble-minimal {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-bottom-left-radius: 4px;
+}
+
+.msg-time-minimal {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.admin .msg-time-minimal { text-align: right; }
+
+.file-link-minimal {
+    font-size: 0.7rem;
+    color: inherit;
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+.btn-status {
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s;
+}
+
+.btn-status.resolved { background: #2a9d8f; color: white; }
+.btn-status.closed { background: #e63946; color: white; }
+.btn-status:hover { opacity: 0.9; }
+
+.icon-btn-minimal {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+}
+
+.send-btn-minimal {
+    background: var(--primary);
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    cursor: pointer;
+}
+
+.file-chip-minimal {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+}

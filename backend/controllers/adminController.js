@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 const AuditLog = require('../models/AuditLog');
 const Review = require('../models/Review');
 const Category = require('../models/Category');
+const Message = require('../models/Message');
 const { notifyOrderStatusChange, sendEmail, sendSMS } = require('../utils/emailService');
 
 // Utility to create an audit log entry
@@ -46,6 +47,22 @@ const getAdminMetrics = async (req, res) => {
         const userGrowth = "+12%";
         const listingGrowth = "+8%";
 
+        // Count total unread messages for admins (Negotiations)
+        const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id');
+        const adminIds = admins.map(a => a._id.toString());
+        const unreadNegotiations = await Message.countDocuments({
+            sender: { $nin: adminIds },
+            isRead: false
+        });
+
+        // Count total unread support tickets
+        const Ticket = require('../models/Ticket');
+        const tickets = await Ticket.find({ status: { $ne: 'closed' } });
+        let unreadSupport = 0;
+        tickets.forEach(t => {
+            unreadSupport += t.messages.filter(m => m.sender.toString() === t.user.toString() && !m.isRead).length;
+        });
+
         res.json({
             totalUsers,
             verifiedSellers,
@@ -54,7 +71,9 @@ const getAdminMetrics = async (req, res) => {
             totalOrders,
             totalRevenue,
             userGrowth,
-            listingGrowth
+            listingGrowth,
+            unreadNegotiations,
+            unreadSupport
         });
     } catch (err) {
         res.status(500).json({ message: 'Server error' });
@@ -83,24 +102,39 @@ const getChartsData = async (req, res) => {
             Users: r.count
         }));
 
-        // 2. Cars by category
+        // 2. System Activity (Listings vs Orders over time)
+        const listings = await Car.aggregate([
+            { $group: { _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } }, count: { $sum: 1 } } },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+
+        const orders = await Order.aggregate([
+            { $group: { _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } }, count: { $sum: 1 } } },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+
+        // Merge into months
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const activityData = listings.map(l => {
+            const dateStr = `${monthNames[l._id.month - 1]} ${l._id.year}`;
+            const orderMatch = orders.find(o => o._id.month === l._id.month && o._id.year === l._id.year);
+            return {
+                name: dateStr,
+                Listings: l.count,
+                Orders: orderMatch ? orderMatch.count : 0
+            };
+        });
+
+        // 3. Cars by category
         const categories = await Car.aggregate([
             { $group: { _id: "$category", count: { $sum: 1 } } }
         ]);
         const categoriesData = categories.map(c => ({ name: c._id || 'Unknown', value: c.count }));
 
-        // 3. Popular Brands
-        const brands = await Car.aggregate([
-            { $group: { _id: "$make", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 5 }
-        ]);
-        const brandsData = brands.map(b => ({ name: b._id, count: b.count }));
-
         res.json({
             registrations: registrationsData,
-            categories: categoriesData,
-            brands: brandsData
+            activity: activityData,
+            categories: categoriesData
         });
     } catch (err) {
         res.status(500).json({ message: 'Server error' });
@@ -118,7 +152,8 @@ const getUsers = async (req, res) => {
         if (search) {
             query.$or = [
                 { name: { $regex: search, $options: 'i' } },
-                { email: { $regex: search, $options: 'i' } }
+                { email: { $regex: search, $options: 'i' } },
+                { username: { $regex: search, $options: 'i' } }
             ];
         }
 
@@ -143,7 +178,7 @@ const getUsers = async (req, res) => {
 const createUserByAdmin = async (req, res) => {
     try {
         const {
-            name, email, password, role = 'user', phone,
+            name, username, email, password, role = 'user', phone,
             isVerifiedSeller, permissions,
             sellerType, sellerBio, shopName, address
         } = req.body;
@@ -156,6 +191,7 @@ const createUserByAdmin = async (req, res) => {
 
         const userData = {
             name,
+            username,
             email,
             password,
             role,
@@ -190,6 +226,7 @@ const createUserByAdmin = async (req, res) => {
             user: {
                 _id: user._id,
                 name: user.name,
+                username: user.username,
                 email: user.email,
                 role: user.role,
                 status: user.status,
@@ -383,7 +420,21 @@ const getAdminOrders = async (req, res) => {
             .populate('user', 'name email')
             .populate('car', 'make model year images price')
             .sort({ createdAt: -1 });
-        res.json({ orders });
+
+        // Get all admin IDs to exclude their messages from the unread count
+        const admins = await User.find({ role: { $in: ['admin', 'super_admin'] } }).select('_id');
+        const adminIds = admins.map(a => a._id.toString());
+
+        const ordersWithUnread = await Promise.all(orders.map(async (order) => {
+            const unreadCount = await Message.countDocuments({
+                order: order._id,
+                sender: { $nin: adminIds },
+                isRead: false
+            });
+            return { ...order._doc, unreadMessages: unreadCount };
+        }));
+
+        res.json({ orders: ordersWithUnread });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
@@ -556,7 +607,7 @@ const changeUserRole = async (req, res) => {
 const updateUserByAdmin = async (req, res) => {
     try {
         const {
-            name, email, phone, status, role, permissions,
+            name, username, email, phone, status, role, permissions,
             isVerifiedSeller, password,
             sellerType, sellerBio, shopName, address
         } = req.body;
@@ -577,6 +628,7 @@ const updateUserByAdmin = async (req, res) => {
         }
 
         user.name = name || user.name;
+        user.username = username || user.username;
         user.email = email || user.email;
         user.phone = phone || user.phone;
         user.status = status || user.status;

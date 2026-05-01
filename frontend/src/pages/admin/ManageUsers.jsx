@@ -11,7 +11,7 @@ const ROLES = ['user', 'admin', 'dealer', 'support', 'finance', 'content_manager
 const STATUSES = ['all', 'active', 'banned'];
 
 const EMPTY_FORM = {
-    name: '', email: '', phone: '', password: '', role: 'user',
+    name: '', username: '', email: '', phone: '', password: '', role: 'user',
     permissions: '', isVerifiedSeller: false
 };
 
@@ -104,6 +104,7 @@ export default function ManageUsers() {
     const openEditModal = (u) => {
         setFormData({
             name: u.name,
+            username: u.username || '',
             email: u.email,
             phone: u.phone || '',
             password: '',
@@ -208,7 +209,7 @@ export default function ManageUsers() {
                                         }
                                         <div>
                                             <strong style={{ fontSize: '0.9rem' }}>{u.name} {u._id === currentUser._id && <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>(You)</span>}</strong>
-                                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                                            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>@{u.username || 'no-username'}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -303,6 +304,10 @@ export default function ManageUsers() {
                                 <div className="form-group">
                                     <label>Display Name *</label>
                                     <input className="form-control" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Username *</label>
+                                    <input className="form-control" value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} required placeholder="johndoe123" />
                                 </div>
                                 <div className="form-group">
                                     <label>Email Address *</label>

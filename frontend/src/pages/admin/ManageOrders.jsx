@@ -20,6 +20,8 @@ export default function ManageOrders() {
 
     useEffect(() => {
         fetchOrders();
+        const interval = setInterval(fetchOrders, 10000); // Poll every 10s
+        return () => clearInterval(interval);
     }, []);
 
     const fetchOrders = async () => {
@@ -264,7 +266,10 @@ export default function ManageOrders() {
                                         {expandedChat === o._id && (
                                             <tr key={`chat-${o._id}`}>
                                                 <td colSpan="6" style={{ padding: 0, background: 'rgba(0,0,0,0.25)', borderTop: '1px solid var(--border-color)' }}>
-                                                    <div style={{ padding: '20px 24px', borderLeft: '3px solid var(--primary)' }}>
+                                                    <div style={{ padding: '20px 24px', borderLeft: '3px solid var(--primary)', position: 'relative' }}>
+                                                        <button className="close-expanded-btn" style={{ top: 15, right: 15, position: 'absolute' }} onClick={() => setExpandedChat(null)}>
+                                                            <FiXCircle />
+                                                        </button>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                                                             <FiMessageSquare style={{ color: 'var(--primary)' }} />
                                                             <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>
@@ -272,6 +277,7 @@ export default function ManageOrders() {
                                                             </span>
                                                             <span style={{
                                                                 marginLeft: 'auto',
+                                                                marginRight: '40px',
                                                                 fontSize: '0.7rem',
                                                                 padding: '2px 10px',
                                                                 background: 'rgba(230, 57, 70, 0.15)',

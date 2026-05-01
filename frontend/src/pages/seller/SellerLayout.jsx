@@ -34,31 +34,23 @@ export default function SellerLayout() {
                 </div>
 
                 <nav className="admin-nav" style={{ padding: '0 15px' }}>
-                    <div className="nav-section-label" style={{ padding: '25px 15px 10px', fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2 }}>Core Operations</div>
                     <NavLink to="/seller" end className={({ isActive }) => isActive ? 'active' : ''}>
-                        <FiGrid /> Overview & Sales Info
+                        <FiGrid /> Dashboard
                     </NavLink>
                     <NavLink to="/seller/inventory" className={({ isActive }) => isActive ? 'active' : ''}>
-                        <FiBox /> Manage Inventory
+                        <FiBox /> Inventory
                     </NavLink>
                     <NavLink to="/seller/orders" className={({ isActive }) => isActive ? 'active' : ''}>
-                        <FiShoppingBag /> Buyer Requests & Orders
+                        <FiShoppingBag /> Leads & Orders
                     </NavLink>
                     <NavLink to="/seller/test-drives" className={({ isActive }) => isActive ? 'active' : ''}>
-                        <FiCalendar /> Scheduled Test Drives
+                        <FiCalendar /> Schedule
                     </NavLink>
-
-                    <div className="nav-section-label" style={{ padding: '30px 15px 10px', fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2 }}>Communication</div>
                     <NavLink to="/seller/messages" className={({ isActive }) => isActive ? 'active' : ''}>
-                        <FiMessageSquare /> Communicate with Buyers
-                    </NavLink>
-
-                    <div className="nav-section-label" style={{ padding: '30px 15px 10px', fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2 }}>Identity</div>
-                    <NavLink to="/seller/profile" className={({ isActive }) => isActive ? 'active' : ''}>
-                        <FiUser /> Business Profile
+                        <FiMessageSquare /> Messages
                     </NavLink>
                     <NavLink to="/profile" className={({ isActive }) => isActive ? 'active' : ''}>
-                        <FiSettings /> Personal Settings
+                        <FiSettings /> Settings
                     </NavLink>
                 </nav>
 

@@ -2,6 +2,7 @@
 .seller-dashboard {
     max-width: 1400px;
     margin: 0 auto;
+    padding-top: 24px;
 }
 
 .gradient-text {
@@ -288,4 +289,86 @@
         flex-direction: column;
         text-align: center;
     }
+}
+
+/* Priority Strip */
+.priority-strip {
+    padding: 20px 32px;
+    background: linear-gradient(90deg, rgba(230, 57, 70, 0.05) 0%, rgba(22, 24, 35, 0.8) 100%);
+    border-left: 4px solid var(--primary) !important;
+}
+
+.priority-items {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+}
+
+.priority-item {
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+}
+
+.priority-item.urgent {
+    color: #fff;
+}
+
+.priority-item .dot {
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.priority-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #10b981;
+    font-weight: 700;
+}
+
+/* Smart Panel & Empty States */
+.action-hint {
+    color: var(--primary) !important;
+    font-weight: 700;
+}
+
+.empty-content-state {
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-content-state p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    max-width: 250px;
+    margin: 0 auto;
+}
+
+.smart-panel {
+    background: linear-gradient(135deg, rgba(22, 24, 35, 0.8) 0%, rgba(31, 34, 50, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.suggestion-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 50%;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.suggestion-item {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
 }

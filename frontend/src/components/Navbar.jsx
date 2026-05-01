@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { FiHeart, FiUser, FiLogOut, FiMenu, FiX, FiShoppingBag, FiBell, FiSun, FiMoon } from 'react-icons/fi';
+import { FiHeart, FiUser, FiLogOut, FiMenu, FiX, FiShoppingBag, FiBell, FiSun, FiMoon, FiSearch, FiPlus } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useFav } from '../context/FavContext';
 import { useTheme } from '../context/ThemeContext';
@@ -15,6 +15,7 @@ export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [notifsOpen, setNotifsOpen] = useState(false);
     const [heartPop, setHeartPop] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const notifsRef = useRef(null);
 
     const [notifications, setNotifications] = useState([]);
@@ -56,7 +57,6 @@ export default function Navbar() {
 
     const markAllAsRead = async () => {
         try {
-            // Sequential update for mock simplicity, in real app would have bulk endpoint
             await Promise.all(notifications.filter(n => n.unread).map(n => api.put(`/auth/notifications/${n._id}`)));
             setNotifications(notifications.map(n => ({ ...n, unread: false })));
         } catch (err) {
@@ -76,34 +76,52 @@ export default function Navbar() {
 
     const handleLogout = () => { logout(); navigate('/'); };
 
+    const handleSearch = (e) => {
+        if (e.key === 'Enter' && searchQuery.trim()) {
+            navigate(`/cars?search=${encodeURIComponent(searchQuery.trim())}`);
+            setSearchQuery('');
+        }
+    };
+
     return (
         <nav className="navbar">
             <div className="container navbar-inner">
+                {/* 1. Left: Logo + Brand name */}
                 <Link to="/" className="navbar-logo">
                     <FiShoppingBag />
                     <span>AutoMarket</span>
                 </Link>
 
+                {/* 2. Center: Navigation links */}
                 <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
                     <NavLink to="/" end onClick={() => setMenuOpen(false)}>Home</NavLink>
                     <NavLink to="/cars" onClick={() => setMenuOpen(false)}>Cars</NavLink>
                     <NavLink to="/compare" onClick={() => setMenuOpen(false)}>Compare</NavLink>
-                    {(viewMode === 'admin' || viewMode === 'dealer') && (
-                        <NavLink to="/seller" onClick={() => setMenuOpen(false)}>Seller Dashboard</NavLink>
-                    )}
                     {user && <NavLink to="/hub" onClick={() => setMenuOpen(false)}>Hub</NavLink>}
                     {user && <NavLink to="/dashboard" onClick={() => setMenuOpen(false)}>My Garage</NavLink>}
                     {user && <NavLink to="/profile" onClick={() => setMenuOpen(false)}>Account</NavLink>}
                 </div>
 
+                {/* 3. Right: Actions */}
                 <div className="navbar-actions">
-                    <button className="nav-icon-btn theme-toggle" onClick={toggleTheme} title={dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
-                        {dark ? <FiSun /> : <FiMoon />}
-                    </button>
-                    <Link to="/favorites" className={`nav-icon-btn ${heartPop ? 'heart-pop' : ''}`} title="Favorites">
-                        <FiHeart fill={favorites.length > 0 ? 'currentColor' : 'none'} />
-                        {favorites.length > 0 && <span className="badge-dot">{favorites.length}</span>}
+                    {/* Search bar */}
+                    <div className="navbar-search">
+                        <FiSearch />
+                        <input 
+                            type="text" 
+                            placeholder="Search..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={handleSearch}
+                        />
+                    </div>
+
+                    {/* + Add Listing */}
+                    <Link to={user ? "/seller/inventory" : "/login"} className="btn-add-listing">
+                        <FiPlus /> <span>Add Listing</span>
                     </Link>
+
+                    {/* Notification icon (🔔) */}
                     {user && (
                         <div className="notifications-wrapper" ref={notifsRef}>
                             <button className="nav-icon-btn" title="Notifications" onClick={() => setNotifsOpen(!notifsOpen)}>
@@ -115,7 +133,7 @@ export default function Navbar() {
                                     <div className="notifications-header">
                                         <h4>Notifications</h4>
                                         {unreadCount > 0 && (
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600 }} onClick={markAllAsRead}>Mark all as read</span>
+                                            <span className="mark-all-btn" onClick={markAllAsRead}>Mark all as read</span>
                                         )}
                                     </div>
                                     <div className="notifications-list">
@@ -143,6 +161,13 @@ export default function Navbar() {
                             )}
                         </div>
                     )}
+
+                    {/* Theme toggle (🌙 / ☀️) */}
+                    <button className="nav-icon-btn theme-toggle" onClick={toggleTheme} title={dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+                        {dark ? <FiSun /> : <FiMoon />}
+                    </button>
+
+                    {/* User profile/avatar (👤) */}
                     {user ? (
                         <div className="nav-user">
                             <Link to="/profile" className="nav-user-profile-link">
@@ -154,46 +179,24 @@ export default function Navbar() {
                                     </div>
                                 )}
                             </Link>
-
+                            
+                            {/* Role Switcher (Hidden in main layout, kept for admin convenience) */}
                             {user?.role === 'admin' && (
-                                <div className="role-switcher">
-                                    <button
-                                        className={`role-switcher-btn ${viewMode === 'user' ? 'active' : ''}`}
-                                        onClick={() => switchViewMode('user')}
-                                        title="View as User"
-                                    >
-                                        User
-                                    </button>
-                                    <button
-                                        className={`role-switcher-btn ${viewMode === 'dealer' ? 'active' : ''}`}
-                                        onClick={() => switchViewMode('dealer')}
-                                        title="View as Seller"
-                                    >
-                                        Seller
-                                    </button>
-                                    <button
-                                        className={`role-switcher-btn ${viewMode === 'admin' ? 'active' : ''}`}
-                                        onClick={() => switchViewMode('admin')}
-                                        title="View as Admin"
-                                    >
-                                        Admin
-                                    </button>
+                                <div className="role-switcher header-role-switcher">
+                                    <button className={`role-switcher-btn ${viewMode === 'admin' ? 'active' : ''}`} onClick={() => switchViewMode('admin')}>Admin</button>
                                 </div>
                             )}
 
-                            {user?.role === 'admin' && viewMode === 'admin' && (
-                                <NavLink to="/admin" className="admin-nav-link">Admin Dashboard</NavLink>
-                            )}
                             <button onClick={handleLogout} className="nav-icon-btn logout-btn" title="Logout">
                                 <FiLogOut />
                             </button>
                         </div>
                     ) : (
-                        <div className="nav-auth-links" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                            <Link to="/login" className="btn btn-outline btn-sm" style={{ border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)' }}>Login</Link>
-                            <Link to="/register" className="btn btn-primary btn-sm">Register</Link>
+                        <div className="nav-auth-links">
+                            <Link to="/login" className="btn btn-outline btn-sm">Login</Link>
                         </div>
                     )}
+
                     <button className="hamburger" onClick={() => setMenuOpen(o => !o)}>
                         {menuOpen ? <FiX /> : <FiMenu />}
                     </button>

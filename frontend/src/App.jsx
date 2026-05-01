@@ -40,6 +40,7 @@ import AdminHub from './pages/admin/AdminHub';
 import ManagePayments from './pages/admin/ManagePayments';
 import ManageReviews from './pages/admin/ManageReviews';
 import ManageCategories from './pages/admin/ManageCategories';
+import ApprovalsQueue from './pages/admin/ApprovalsQueue';
 import SellerLayout from './pages/seller/SellerLayout';
 import SellerDashboard from './pages/seller/SellerDashboard';
 import ManageInventory from './pages/seller/ManageInventory';
@@ -53,6 +54,8 @@ import Contact from './pages/Contact';
 import FinancingApplication from './pages/FinancingApplication';
 import Profile from './pages/Profile';
 import UserHub from './pages/UserHub';
+import NewTicket from './pages/support/NewTicket';
+import TicketChat from './pages/support/TicketChat';
 
 export default function App() {
   return (
@@ -80,6 +83,8 @@ export default function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/financing" element={<ProtectedRoute><FinancingApplication /></ProtectedRoute>} />
+                <Route path="/support/new" element={<ProtectedRoute><NewTicket /></ProtectedRoute>} />
+                <Route path="/support/tickets/:id" element={<ProtectedRoute><TicketChat /></ProtectedRoute>} />
 
                 <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminLayout /></ProtectedRoute>}>
                   <Route index element={<AdminHub />} />
@@ -103,6 +108,7 @@ export default function App() {
                   <Route path="reviews" element={<ProtectedRoute requiredPermission="manage_reviews"><ManageReviews /></ProtectedRoute>} />
                   <Route path="categories" element={<ProtectedRoute requiredPermission="manage_catalog"><ManageCategories /></ProtectedRoute>} />
                   <Route path="audit-logs" element={<ProtectedRoute requiredPermission="view_audit_logs"><AuditLogs /></ProtectedRoute>} />
+                  <Route path="approvals" element={<ProtectedRoute requiredPermission="manage_listings"><ApprovalsQueue /></ProtectedRoute>} />
                 </Route>
 
                 <Route path="/seller" element={<ProtectedRoute requiredRole="dealer"><SellerLayout /></ProtectedRoute>}>

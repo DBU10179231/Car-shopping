@@ -12,8 +12,8 @@ const Notification = require('../models/Notification');
 const AuditLog = require('../models/AuditLog');
 
 const users = [
-    { name: 'Super Admin', email: 'tebelmaryam437@gmail.com', password: 'Admin@123', role: 'super_admin' },
-    { name: 'John Dealer', email: 'dealer@carshop.com', password: 'Admin@123', role: 'dealer', shopName: 'Johns Auto' },
+    { name: 'Super Admin', username: 'Admin', email: 'tebelmaryam437@gmail.com', password: 'Admin@123', role: 'super_admin' },
+    { name: 'John Dealer', username: 'john_dealer', email: 'dealer@carshop.com', password: 'Admin@123', role: 'dealer', shopName: 'Johns Auto' },
     { name: 'Alice Buyer', email: 'buyer@carshop.com', password: 'Admin@123', role: 'user' },
     { name: 'Bob Support', email: 'support@carshop.com', password: 'Admin@123', role: 'support' },
     { name: 'Charlie Finance', email: 'finance@carshop.com', password: 'Admin@123', role: 'finance' }

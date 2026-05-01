@@ -4,10 +4,9 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { useFav } from '../context/FavContext';
 import StarRating from '../components/StarRating';
-import LoanCalculator from '../components/LoanCalculator';
 import CheckoutButton from '../components/CheckoutButton';
 import { toast } from 'react-toastify';
-import { FiHeart, FiMapPin, FiZap, FiCalendar, FiClock, FiDroplet, FiCpu, FiActivity, FiBox, FiX, FiChevronLeft, FiChevronRight, FiCheckCircle, FiShare2, FiFacebook, FiTwitter, FiLink, FiDollarSign } from 'react-icons/fi';
+import { FiHeart, FiMapPin, FiZap, FiCalendar, FiClock, FiDroplet, FiCpu, FiActivity, FiBox, FiX, FiChevronLeft, FiChevronRight, FiCheckCircle, FiShare2, FiFacebook, FiTwitter, FiLink, FiDollarSign, FiShield, FiCreditCard, FiSmartphone } from 'react-icons/fi';
 import CarCard from '../components/CarCard';
 import { sanitizeImageUrl } from '../utils/imageUtils';
 import './CarDetail.css';
@@ -89,6 +88,14 @@ export default function CarDetail() {
         navigator.clipboard.writeText(window.location.href);
         toast.success("Link copied to clipboard!");
     };
+
+    const applyQuickOption = (opt) => {
+        setInquiry(p => ({ ...p, message: opt }));
+    };
+
+    const quickOptions = inquiry.type === 'buy' 
+        ? ["Offer a lower price", "Ask for last price", "Request discount"]
+        : ["Interested in this vehicle", "Weekend appointment", "Morning test drive"];
 
     const submitInquiry = async (e) => {
         e.preventDefault();
@@ -286,38 +293,75 @@ export default function CarDetail() {
                         <p>{car.status === 'sold' ? 'Inventory locked for sold vehicles' : 'Instant solutions for your automotive journey'}</p>
                     </div>
 
-                    <div className="action-grid" style={{ opacity: car.status === 'sold' ? 0.5 : 1, pointerEvents: car.status === 'sold' ? 'none' : 'auto' }}>
-                        {/* 1. Transaction Desk (Negotiate/Book) */}
+                    <div className="action-grid" style={{ opacity: car.status === 'sold' ? 0.5 : 1, pointerEvents: car.status === 'sold' ? 'none' : 'auto', gridTemplateColumns: '1fr 1fr' }}>
+                        {/* 1. Negotiation Hub (Negotiate/Book) */}
                         <div className="action-card glass-card">
                             <div className="card-header-premium">
-                                <h3>Transaction Desk</h3>
+                                <h3>Negotiation Hub</h3>
+                                <p>What would you like to negotiate or ask?</p>
                             </div>
                             <form className="command-form" onSubmit={submitInquiry}>
                                 <div className="form-toggle">
-                                    <button type="button" className={inquiry.type === 'buy' ? 'active' : ''} onClick={() => setInquiry(p => ({ ...p, type: 'buy' }))}>Negotiate</button>
-                                    <button type="button" className={inquiry.type === 'test_drive' ? 'active' : ''} onClick={() => setInquiry(p => ({ ...p, type: 'test_drive' }))}>Test Drive</button>
+                                    <button type="button" className={inquiry.type === 'buy' ? 'active' : ''} onClick={() => setInquiry(p => ({ ...p, type: 'buy', message: '' }))}>Negotiate</button>
+                                    <button type="button" className={inquiry.type === 'test_drive' ? 'active' : ''} onClick={() => setInquiry(p => ({ ...p, type: 'test_drive', message: '' }))}>Test Drive</button>
                                 </div>
-                                <input className="command-input" type="tel" placeholder="Contact number" disabled={car.status === 'sold'} value={inquiry.phone} onChange={e => setInquiry(p => ({ ...p, phone: e.target.value }))} />
-                                {inquiry.type === 'test_drive' && (
-                                    <div className="date-time-grid">
-                                        <input className="command-input" type="date" required disabled={car.status === 'sold'} value={inquiry.bookingDate} onChange={e => setInquiry(p => ({ ...p, bookingDate: e.target.value }))} />
-                                        <input className="command-input" type="time" required disabled={car.status === 'sold'} value={inquiry.bookingTime} onChange={e => setInquiry(p => ({ ...p, bookingTime: e.target.value }))} />
+
+                                <div className="quick-options-container">
+                                    <label className="section-label">Quick Selection</label>
+                                    <div className="quick-options-grid">
+                                        {quickOptions.map(opt => (
+                                            <button 
+                                                key={opt} 
+                                                type="button" 
+                                                className={`quick-option-chip ${inquiry.message === opt ? 'active' : ''}`}
+                                                onClick={() => applyQuickOption(opt)}
+                                            >
+                                                {opt}
+                                            </button>
+                                        ))}
                                     </div>
-                                )}
-                                <textarea className="command-textarea" placeholder="Your requirements..." disabled={car.status === 'sold'} value={inquiry.message} onChange={e => setInquiry(p => ({ ...p, message: e.target.value }))} />
-                                <button type="submit" className="btn btn-primary btn-full" disabled={car.status === 'sold'}>{car.status === 'sold' ? 'Locked' : 'Dispatch Request'}</button>
+                                </div>
+
+                                <div style={{ display: 'grid', gap: 15 }}>
+                                    <div>
+                                        <label className="section-label">Contact Number</label>
+                                        <input className="command-input" type="tel" placeholder="e.g. +251..." required disabled={car.status === 'sold'} value={inquiry.phone} onChange={e => setInquiry(p => ({ ...p, phone: e.target.value }))} />
+                                    </div>
+
+                                    {inquiry.type === 'test_drive' && (
+                                        <div className="date-time-grid">
+                                            <div>
+                                                <label className="section-label">Preferred Date</label>
+                                                <input className="command-input" type="date" required disabled={car.status === 'sold'} value={inquiry.bookingDate} onChange={e => setInquiry(p => ({ ...p, bookingDate: e.target.value }))} />
+                                            </div>
+                                            <div>
+                                                <label className="section-label">Preferred Time</label>
+                                                <input className="command-input" type="time" required disabled={car.status === 'sold'} value={inquiry.bookingTime} onChange={e => setInquiry(p => ({ ...p, bookingTime: e.target.value }))} />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label className="section-label">Message (Optional)</label>
+                                        <textarea className="command-textarea" placeholder="Add additional notes..." disabled={car.status === 'sold'} value={inquiry.message} onChange={e => setInquiry(p => ({ ...p, message: e.target.value }))} />
+                                    </div>
+                                </div>
+
+                                <button type="submit" className="btn btn-primary btn-full" disabled={car.status === 'sold'}>
+                                    {car.status === 'sold' ? 'Locked' : 'Send Request'}
+                                </button>
                             </form>
                         </div>
 
                         {/* 2. Instant Procurement (Checkout) */}
                         <div className="action-card glass-card active-card">
                             <div className="card-header-premium">
-                                <h3>Instant Procurement</h3>
-                                <p>{car.status === 'sold' ? 'Sold Out' : 'Secure this vehicle immediately'}</p>
+                                <h3>Instant Purchase</h3>
+                                <p>{car.status === 'sold' ? 'Sold Out' : 'Secure this vehicle with Chapa'}</p>
                             </div>
                             <div className="procure-body">
                                 <div className="price-intelligence">
-                                    <label>Fixed Price</label>
+                                    <label>Vehicle Price</label>
                                     <div className="val">{car.price.toLocaleString()} ETB</div>
                                 </div>
                                 {car.status === 'sold' ? (
@@ -327,17 +371,12 @@ export default function CarDetail() {
                                 ) : (
                                     <CheckoutButton car={car} onPaymentSuccess={() => navigate('/buyer/dashboard')} />
                                 )}
+                                <div style={{ marginTop: 20, display: 'flex', justifyContent: 'center', gap: 15, opacity: 0.6 }}>
+                                    <FiShield title="Secure" />
+                                    <FiCreditCard title="Card" />
+                                    <FiSmartphone title="Mobile Pay" />
+                                </div>
                                 <p className="secure-p"><FiCheckCircle /> Verified Encrypted Transaction</p>
-                            </div>
-                        </div>
-
-                        {/* 3. Financial Matrix (Loan Calc) */}
-                        <div className="action-card glass-card">
-                            <div className="card-header-premium">
-                                <h3>Financial Matrix</h3>
-                            </div>
-                            <div className="finance-body">
-                                <LoanCalculator carPrice={car.price} />
                             </div>
                         </div>
                     </div>

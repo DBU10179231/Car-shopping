@@ -398,6 +398,55 @@
     gap: 15px;
 }
 
+.command-textarea {
+    min-height: 80px;
+    resize: none;
+    margin-bottom: 0;
+}
+
+.section-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.quick-options-container {
+    margin-bottom: 20px;
+}
+
+.quick-options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.quick-option-chip {
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.quick-option-chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+
+.quick-option-chip.active {
+    background: var(--primary-glow);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
 .btn-full {
     width: 100%;
     padding: 14px;

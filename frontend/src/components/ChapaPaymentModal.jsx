@@ -13,13 +13,22 @@ export default function ChapaPaymentModal({
     paymentData, 
     onSuccess 
 }) {
-    const [activeMethod, setActiveMethod] = useState('bank');
-    const [phone, setPhone] = useState('0900123456');
+    const [activeMethod, setActiveMethod] = useState(paymentData?.preferredMethod || 'bank');
+    const [phone, setPhone] = useState(paymentData?.phone || '0900123456');
     const [pin, setPin] = useState('');
     const [step, setStep] = useState(1); // 1: Init, 2: PIN/OTP
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState(null); // 'success', 'error'
     const [errorMsg, setErrorMsg] = useState('');
+
+    useEffect(() => {
+        if (paymentData?.preferredMethod) {
+            setActiveMethod(paymentData.preferredMethod);
+        }
+        if (paymentData?.phone) {
+            setPhone(paymentData.phone);
+        }
+    }, [paymentData]);
 
     if (!isOpen) return null;
 
@@ -41,7 +50,8 @@ export default function ChapaPaymentModal({
     };
 
     const handlePay = async () => {
-        if (!pin || pin.length < 4) {
+        const cleanPin = String(pin).trim();
+        if (!cleanPin || cleanPin.length !== 4 || isNaN(cleanPin)) {
             toast.error('Please enter a valid 4-digit PIN');
             return;
         }
@@ -50,9 +60,10 @@ export default function ChapaPaymentModal({
         try {
             await new Promise(r => setTimeout(r, 1500));
 
+            console.log('Sending simulate-mobile-confirm with:', { tx_ref: paymentData?.tx_ref, pin: cleanPin });
             const res = await api.post('/payments/simulate-mobile-confirm', {
                 tx_ref: paymentData?.tx_ref,
-                pin: pin
+                pin: cleanPin
             });
 
             if (res.data.status === 'success') {
@@ -193,7 +204,7 @@ export default function ChapaPaymentModal({
                     )}
 
                     <div className="chapa-footer-secure">
-                        <FiLock /> Secured By Chapa
+                        <FiLock /> Secured By Chapa Gateway • <a href="#" style={{ color: 'inherit' }}>Refund Policy</a>
                     </div>
                 </main>
 

@@ -6,7 +6,7 @@ import {
     FiUser, FiHeart, FiPackage, FiCamera, FiSearch, FiMessageCircle,
     FiCalendar, FiFileText, FiStar, FiClock, FiTruck, FiMapPin,
     FiRefreshCw, FiCheckCircle, FiShield, FiMessageSquare, FiSettings, FiLogOut, FiGrid,
-    FiActivity, FiChevronRight, FiCreditCard
+    FiActivity, FiChevronRight, FiCreditCard, FiDownload, FiInfo, FiCheck, FiX
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
@@ -27,10 +27,22 @@ export default function BuyerDashboard() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [expandedOrder, setExpandedOrder] = useState(null);
     const [receiptLoading, setReceiptLoading] = useState(null);
+    const [activeOrderTab, setActiveOrderTab] = useState('messages');
     const navigate = useNavigate();
+
+    const handleToggleExpand = (orderId) => {
+        if (expandedOrder === orderId) {
+            setExpandedOrder(null);
+        } else {
+            setExpandedOrder(orderId);
+            setActiveOrderTab('messages');
+        }
+    };
 
     useEffect(() => {
         fetchData();
+        const interval = setInterval(fetchData, 15000); // Poll every 15s
+        return () => clearInterval(interval);
     }, []);
 
     const fetchData = async () => {
@@ -176,7 +188,7 @@ export default function BuyerDashboard() {
                                         <div className="order-items">
                                             {purchases.map(order => (
                                                 <div key={order._id} className="order-item-complex">
-                                                    <div className={`order-summary ${expandedOrder === order._id ? 'expanded' : ''}`} onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}>
+                                                    <div className={`order-summary ${expandedOrder === order._id ? 'expanded' : ''}`} onClick={() => handleToggleExpand(order._id)}>
                                                         <div className="car-preview">
                                                             <img src={sanitizeImageUrl(order?.car?.images?.[0], 'car')} alt="" />
                                                             <span className="overlay-badge">{order.orderType?.toUpperCase()}</span>
@@ -204,37 +216,114 @@ export default function BuyerDashboard() {
 
                                                     {expandedOrder === order._id && (
                                                         <div className="order-details-expanded">
-                                                            <OrderTimeline order={order} />
-                                                            <div className="action-row">
-                                                                <button className="btn btn-secondary" style={{ position: 'relative' }} onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setActiveTab('negotiations');
-                                                                    setSelectedOrder(order._id);
-                                                                }}>
-                                                                    <FiMessageCircle /> Message Seller & Admin
-                                                                    {order.unreadMessages > 0 && (
-                                                                        <span className="unread-badge">
-                                                                            {order.unreadMessages}
-                                                                        </span>
-                                                                    )}
-                                                                </button>
-                                                                <button className="btn btn-outline" onClick={(e) => { e.stopPropagation(); navigate(`/cars/${order.car?._id}`); }}>Technical Specs</button>
-                                                                {order.paymentStatus === 'paid' && order.tx_ref && (
+                                                            {/* 1. Car Summary Card (Header) */}
+                                                            <div className="asset-summary-card">
+                                                                <div className="asset-main">
+                                                                    <div className="asset-image">
+                                                                        <img src={sanitizeImageUrl(order?.car?.images?.[0], 'car')} alt="" />
+                                                                    </div>
+                                                                    <div className="asset-details">
+                                                                        <h4>{order?.car?.make} {order?.car?.model} <span className="year">{order?.car?.year}</span></h4>
+                                                                        <div className="transaction-id">ID: #{order._id.toUpperCase()}</div>
+                                                                        {order.tx_ref && <div className="tx-hash">TX Hash: {order.tx_ref}</div>}
+                                                                        <div className="order-date">Initiated: {new Date(order.createdAt).toLocaleDateString()}</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="asset-status-card">
+                                                                    <div className="value-label">Asset Valuation</div>
+                                                                    <div className="value-amount">${order.totalAmount?.toLocaleString()}</div>
+                                                                    <div className={`status-badge-premium ${order.status}`}>{order.status.toUpperCase()}</div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* 2 & 3. Progress Tracker & Status Box */}
+                                                            <div className="tracker-section">
+                                                                <OrderTimeline order={order} />
+                                                            </div>
+
+                                                            {/* 4. Tabs (Collaboration Layer) */}
+                                                            <div className="collaboration-layer">
+                                                                <div className="detail-tabs">
                                                                     <button
-                                                                        className="btn btn-outline"
-                                                                        style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-                                                                        onClick={(e) => handleViewReceipt(e, order)}
-                                                                        disabled={receiptLoading === order._id}
+                                                                        className={`tab-btn ${activeOrderTab === 'messages' ? 'active' : ''}`}
+                                                                        onClick={() => setActiveOrderTab('messages')}
                                                                     >
-                                                                        {receiptLoading === order._id ? (
-                                                                            <span style={{ width: 14, height: 14, border: '2px solid var(--primary)', borderTop: '2px solid transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }} />
-                                                                        ) : (
-                                                                            <FiFileText />
-                                                                        )}
-                                                                        Official Receipt
+                                                                        <FiMessageCircle /> Message Seller & Admin
+                                                                        {order.unreadMessages > 0 && <span className="unread-dot-tab">{order.unreadMessages}</span>}
                                                                     </button>
-                                                                )}
-                                                                {order.status === 'completed' && <button className="btn btn-primary">Download Title</button>}
+                                                                    <button
+                                                                        className={`tab-btn ${activeOrderTab === 'specs' ? 'active' : ''}`}
+                                                                        onClick={() => setActiveOrderTab('specs')}
+                                                                    >
+                                                                        <FiInfo /> Technical Specs
+                                                                    </button>
+                                                                </div>
+
+                                                                <div className="tab-viewport glass-panel" style={{ position: 'relative', display: activeOrderTab ? 'block' : 'none' }}>
+                                                                    {activeOrderTab === 'messages' ? (
+                                                                        <div className="embedded-chat">
+                                                                            <button className="close-expanded-btn" onClick={(e) => { e.stopPropagation(); setActiveOrderTab(null); }} title="Close Chat">
+                                                                                <FiX />
+                                                                            </button>
+                                                                            <NegotiationChat orderId={order._id} isSeller={false} />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="specs-display-grid">
+                                                                            <button className="close-expanded-btn" onClick={(e) => { e.stopPropagation(); setActiveOrderTab(null); }} title="Close Specs">
+                                                                                <FiX />
+                                                                            </button>
+                                                                            <div className="spec-card">
+                                                                                <span className="label">Engine / Power</span>
+                                                                                <span className="value">{order.car?.engine || 'V6 Twin Turbo'}</span>
+                                                                            </div>
+                                                                            <div className="spec-card">
+                                                                                <span className="label">Transmission</span>
+                                                                                <span className="value">{order.car?.transmission || 'Automatic'}</span>
+                                                                            </div>
+                                                                            <div className="spec-card">
+                                                                                <span className="label">Drivetrain</span>
+                                                                                <span className="value">{order.car?.drivetrain || 'AWD'}</span>
+                                                                            </div>
+                                                                            <div className="spec-card">
+                                                                                <span className="label">Mileage</span>
+                                                                                <span className="value">{order.car?.mileage?.toLocaleString() || '12,400'} KM</span>
+                                                                            </div>
+                                                                            <div className="spec-card">
+                                                                                <span className="label">Fuel Type</span>
+                                                                                <span className="value">{order.car?.fuelType || 'Premium'}</span>
+                                                                            </div>
+                                                                            <div className="spec-card">
+                                                                                <span className="label">Condition</span>
+                                                                                <span className="value">{order.car?.condition || 'Excellent'}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* 5. Action Buttons (Execution Layer) */}
+                                                            <div className="execution-layer">
+                                                                <div className="action-row">
+                                                                    {order.paymentStatus === 'paid' && order.tx_ref && (
+                                                                        <button
+                                                                            className="btn btn-outline"
+                                                                            onClick={(e) => handleViewReceipt(e, order)}
+                                                                            disabled={receiptLoading === order._id}
+                                                                        >
+                                                                            {receiptLoading === order._id ? (
+                                                                                <span className="loader-sm" />
+                                                                            ) : (
+                                                                                <FiFileText />
+                                                                            )}
+                                                                            Official Receipt
+                                                                        </button>
+                                                                    )}
+                                                                    {(order.status === 'completed' || order.status === 'delivered') && (
+                                                                        <button className="btn btn-primary">
+                                                                            <FiDownload /> Download Title
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     )}
@@ -296,7 +385,12 @@ export default function BuyerDashboard() {
                                 </div>
 
                                 {/* Chat Area */}
-                                <div style={{ background: 'rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+                                <div style={{ background: 'rgba(0,0,0,0.1)', overflow: 'hidden', position: 'relative' }}>
+                                    {selectedOrder && (
+                                        <button className="close-expanded-btn" style={{ width: 36, height: 36, fontSize: '1rem' }} onClick={() => setSelectedOrder(null)}>
+                                            <FiX />
+                                        </button>
+                                    )}
                                     {selectedOrder ? (
                                         <NegotiationChat
                                             orderId={selectedOrder}
